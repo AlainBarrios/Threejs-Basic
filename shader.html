@@ -1,0 +1,18 @@
+<div class="content-canvas"></div>
+<script id="vertex" type="x-shader/x-vertex">
+  varying vec2 vUv;
+  void main(){
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);  
+  }
+</script>
+<script id="fragment" type="x-shader/x-fragment">
+  uniform vec2 u_mouse;
+  uniform vec2 u_resolution;
+  uniform float u_time;
+  
+  void main(){
+    vec2 st = gl_FragCoord.xy / u_resolution;
+    gl_FragColor = vec4(st, 1.0, 1.0);
+  }  
+</script>
