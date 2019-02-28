@@ -8,11 +8,26 @@
 </script>
 <script id="fragment" type="x-shader/x-fragment">
   uniform vec2 u_mouse;
-  uniform vec2 u_resolution;
+  uniform vec2 u_res;
   uniform float u_time;
+  uniform float maxRadius;
+  uniform float minRadius;
+  uniform vec2 direction;
+  uniform sampler2D text;
+  
+  varying vec2 vUv;
   
   void main(){
-    vec2 st = gl_FragCoord.xy / u_resolution;
-    gl_FragColor = vec4(st, 1.0, 1.0);
+    vec2 uv1 = vUv; 
+    
+    vec2 st = gl_FragCoord.xy / u_res;
+    float dist = distance(vec2(u_mouse.x, ((1. - u_mouse.y) - 0.5) + 0.5 ),uv1);
+    vec4 ori_img = texture2D(text, uv1);
+    
+    if(dist < .1){
+      ori_img *= 1. + (1. - dist / .1);
+    }  
+    
+    gl_FragColor = blur_img;
   }  
 </script>
