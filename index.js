@@ -5,13 +5,6 @@ class MathUtils {
     return n * (b - a) + a;
   }
 }
-class MathUtils {
-  constructor() {}
-
-  lerp(a, b, n) {
-    return n * (b - a) + a;
-  }
-}
 
 const init = () => {
   const content = document.querySelector(".content-canvas");
