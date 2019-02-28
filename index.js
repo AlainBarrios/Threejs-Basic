@@ -1,8 +1,28 @@
+class MathUtils {
+  constructor() {}
+
+  lerp(a, b, n) {
+    return n * (b - a) + a;
+  }
+}
+class MathUtils {
+  constructor() {}
+
+  lerp(a, b, n) {
+    return n * (b - a) + a;
+  }
+}
+
 const init = () => {
   const content = document.querySelector(".content-canvas");
   const shader = {
     v: document.querySelector("#vertex").textContent,
     f: document.querySelector("#fragment").textContent
+  };
+  const mathUtils = new MathUtils();
+  const mouse = {
+    x: 0,
+    y: 0
   };
   const gl = {
     renderer: new THREE.WebGLRenderer(),
@@ -12,13 +32,22 @@ const init = () => {
       0.1,
       1000
     ),
-    scene: new THREE.Scene()
+    scene: new THREE.Scene(),
+    loader: new THREE.TextureLoader()
   };
 
   const uniforms = {
     u_time: { type: "f", value: 0 },
     u_res: { type: "v2", value: new THREE.Vector2(innerWidth, innerHeight) },
-    u_mouse: { type: "v2", value: new THREE.Vector2(0, 0) }
+    u_mouse: { type: "v2", value: new THREE.Vector2(0, 0) },
+    direction: { type: "v2", value: new THREE.Vector2(0, 0) },
+    maxRadius: { type: "f", value: 100 },
+    minRadius: { type: "f", value: 25 },
+    text: {
+      value: gl.loader.load(
+        "https://images.unsplash.com/photo-1550847067-93887e03cfbe?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjE0NTg5fQ"
+      )
+    }
   };
 
   const addScene = () => {
@@ -42,7 +71,21 @@ const init = () => {
     gl.scene.add(gl.mesh);
   };
 
-  const update = () => {
+  let time = 0;
+  const update = e => {
+    time = e/1000;
+    uniforms.u_time.value += time;
+ 
+    uniforms.u_mouse.value.x = mathUtils.lerp(
+      uniforms.u_mouse.value.x,
+      mouse.x,
+      0.05
+    );
+    uniforms.u_mouse.value.y = mathUtils.lerp(
+      uniforms.u_mouse.value.y,
+      mouse.y,
+      0.05
+    );
     render();
     requestAnimationFrame(update);
   };
@@ -72,8 +115,13 @@ const init = () => {
   addScene();
   addMesh();
   update();
-  //resize()
-  //window.addEventListener('resize', resize)
+  resize();
+  window.addEventListener("resize", resize);
+  window.addEventListener("mousemove", ({ clientX, clientY }) => {
+    mouse.x = clientX / innerWidth;
+    mouse.y = clientY / innerHeight;
+  });
 };
 
 init();
+
