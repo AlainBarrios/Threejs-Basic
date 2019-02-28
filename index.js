@@ -1,5 +1,9 @@
 const init = () => {
   const content = document.querySelector(".content-canvas");
+  const shader = {
+    v: document.querySelector("#vertex").textContent,
+    f: document.querySelector("#fragment").textContent
+  };
   const gl = {
     renderer: new THREE.WebGLRenderer(),
     camera: new THREE.PerspectiveCamera(
@@ -11,17 +15,27 @@ const init = () => {
     scene: new THREE.Scene()
   };
 
+  const uniforms = {
+    u_time: { type: "f", value: 0 },
+    u_res: { type: "v2", value: new THREE.Vector2(innerWidth, innerHeight) },
+    u_mouse: { type: "v2", value: new THREE.Vector2(0, 0) }
+  };
+
   const addScene = () => {
     gl.renderer.setSize(innerWidth, innerHeight);
     gl.camera.position.z = 5;
-    gl.controls = new THREE.OrbitControls(gl.camera, gl.renderer.domElement);
+    //gl.controls = new THREE.OrbitControls(gl.camera, gl.renderer.domElement);
     content.append(gl.renderer.domElement);
     gl.scene.add(gl.camera);
   };
 
   const addMesh = () => {
     const geometry = new THREE.PlaneGeometry(1, 1, 1);
-    const material = new THREE.MeshBasicMaterial({ color: "#F9E26E" });
+    const material = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: shader.v,
+      fragmentShader: shader.f
+    });
 
     gl.mesh = new THREE.Mesh(geometry, material);
 
