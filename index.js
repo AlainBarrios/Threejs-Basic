@@ -26,7 +26,8 @@ const init = () => {
       1000
     ),
     scene: new THREE.Scene(),
-    loader: new THREE.TextureLoader()
+    loader: new THREE.TextureLoader(),
+    clock: new THREE.Clock()
   };
 
   const uniforms = {
@@ -64,10 +65,10 @@ const init = () => {
     gl.scene.add(gl.mesh);
   };
 
-  let time = 0;
+  let elapsed = 0
   const update = e => {
-    time = e/1000;
-    uniforms.u_time.value += time;
+    elapsed = gl.clock.getElapsedTime();
+    uniforms.u_time.value = elapsed
  
     uniforms.u_mouse.value.x = mathUtils.lerp(
       uniforms.u_mouse.value.x,
