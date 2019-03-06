@@ -45,6 +45,7 @@ const init = () => {
   };
 
   const addScene = () => {
+    gl.renderer.setPixelRatio(devicePixelRatio);
     gl.renderer.setSize(innerWidth, innerHeight);
     gl.camera.position.z = 5;
     //gl.controls = new THREE.OrbitControls(gl.camera, gl.renderer.domElement);
