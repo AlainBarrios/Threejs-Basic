@@ -4,6 +4,38 @@ class MathUtils {
   lerp(a, b, n) {
     return n * (b - a) + a;
   }
+  
+  to(obj, time, set) {
+    const start = performance.now();
+    const duration = time * 1000;
+    return new Promise(resolve => {
+      const opts = {
+        obj,
+        time,
+        duration,
+        start,
+        set,
+        resolve
+      };
+      this.update(opts);
+    });
+  }
+
+  update(opts) {
+    const now = performance.now();
+    const p = (now - opts.start) / opts.duration;
+
+    if (p >= 1) {
+      opts.completed = true;
+      return opts.resolve();
+    }
+
+    for (let v in opts.set) {
+      opts.obj[v] = this.lerp(opts.obj[v], opts.set[v], this.outElastic(p));
+    }
+
+    requestAnimationFrame(() => this.update(opts));
+  }
 }
 
 const init = () => {
