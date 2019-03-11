@@ -156,6 +156,12 @@ const init = () => {
     mouse.x = clientX / innerWidth;
     mouse.y = clientY / innerHeight;
   });
+    
+  content.addEventListener("click", () => {
+    TweenMax.to(uniforms.diff, 2, {
+      value: 1
+    });
+  });
 };
 
 init();
