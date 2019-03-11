@@ -1,15 +1,19 @@
 class MathUtils {
-  constructor() {}
+    constructor() {
+    this.complete = false;
+    this.opts = {};
+    this.update = this.update.bind(this);
+  }
 
   lerp(a, b, n) {
     return n * (b - a) + a;
   }
-  
+
   to(obj, time, set) {
     const start = performance.now();
     const duration = time * 1000;
     return new Promise(resolve => {
-      const opts = {
+      this.opts = {
         obj,
         time,
         duration,
@@ -17,24 +21,28 @@ class MathUtils {
         set,
         resolve
       };
-      this.update(opts);
+      this.update();
     });
   }
 
-  update(opts) {
+  update() {
     const now = performance.now();
-    const p = (now - opts.start) / opts.duration;
-
+    const p = (now - this.opts.start) / this.opts.duration;
+    
     if (p >= 1) {
-      opts.completed = true;
-      return opts.resolve();
+      this.opts.completed = true;
+      return this.opts.resolve();
     }
 
-    for (let v in opts.set) {
-      opts.obj[v] = this.lerp(opts.obj[v], opts.set[v], this.outElastic(p));
+    for (let v in this.opts.set) {
+      this.opts.obj[v] = this.lerp(
+        this.opts.obj[v],
+        this.opts.set[v],
+        this.outElastic(p)
+      );
     }
 
-    requestAnimationFrame(() => this.update(opts));
+    requestAnimationFrame(this.update);
   }
 }
 
