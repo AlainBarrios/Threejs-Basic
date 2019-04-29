@@ -1,168 +1,151 @@
-class MathUtils {
-    constructor() {
-    this.complete = false;
-    this.opts = {};
-    this.update = this.update.bind(this);
-  }
+const shaders = {
+  vertex: `
+    varying vec2 vUv;
 
+    void main(){
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
+    }
+    `,
+  fragment: `
+    #define PI 3.14159265359
+    #define PI2 6.28318530718
+    #define S(a,b,n) smoothstep(a,b,n)
+
+    uniform float u_time;
+    
+    uniform vec2 u_resolution;    
+    uniform vec2 u_mouse;
+
+    varying vec2 vUv;
+
+    void main(){
+      vec2 uv = vUv;
+      vec2 st = gl_FragCoord.xy / u_resolution * 2. - 1.;
+
+      uv -= .5;
+      uv.x *= u_resolution.x / u_resolution.y;
+
+      float l = length(uv);
+      float a = atan(uv.x, uv.y);
+      float d = cos(10. * a + u_time + cos(a + PI * u_time + sin(10. + u_time)) * .5 ) * .2;
+      vec3 e = vec3(smoothstep(d, d + .02, l));
+
+      gl_FragColor = vec4(e, 1.);
+    }
+    `
+};
+
+class MathUtils {
   lerp(a, b, n) {
     return n * (b - a) + a;
   }
+}
 
-  to(obj, time, set) {
-    const start = performance.now();
-    const duration = time * 1000;
-    return new Promise(resolve => {
-      this.opts = {
-        obj,
-        time,
-        duration,
-        start,
-        set,
-        resolve
-      };
-      this.update();
+class WebGL {
+  constructor(canvas) {
+    this.width = innerWidth;
+    this.height = innerHeight;
+
+    this.renderer = new THREE.WebGLRenderer({ canvas: canvas });
+    this.camera = new THREE.OrthographicCamera(
+      window.innerWidth / -2,
+      window.innerWidth / 2,
+      window.innerHeight / 2,
+      window.innerHeight / -2,
+      0.1,
+      1000
+    );
+    this.scene = new THREE.Scene();
+    this.clock = new THREE.Clock()
+
+    this.uniforms = {
+      u_time: { type: "f", value: 0 },
+      u_resolution: {
+        type: "v2",
+        value: new THREE.Vector2(this.width, this.height)
+      },
+      u_mouse: { type: "v2", value: new THREE.Vector2(0, 0) }
+    };
+    this.mouse = {
+      x: 0,
+      y: 0
+    }
+    
+    this.math = new MathUtils()
+    
+    this.onMouse = this.onMouse.bind(this);
+    this.onResize = this.onResize.bind(this);
+    this.update = this.update.bind(this);
+  }
+
+  init() {
+    this.renderer.setSize(this.width, this.height);
+    this.camera.position.set(0, 0, 1);
+    this.scene.add(this.camera);
+
+    this.addMesh();
+    this.onResize()
+    this.update();
+    
+    canvas.addEventListener('mousemove', this.onMouse)
+    window.addEventListener('resize', this.onResize)
+  }
+
+  addMesh() {
+    const geometry = new THREE.PlaneBufferGeometry(this.width, this.height, 60, 60);
+    const material = new THREE.ShaderMaterial({
+      uniforms: this.uniforms,
+      vertexShader: shaders.vertex,
+      fragmentShader: shaders.fragment
     });
+
+    this.mesh = new THREE.Mesh(geometry, material);
+
+    this.scene.add(this.mesh);
+  }
+  
+  onMouse({clientX, clientY}){
+    this.mouse = {
+      x: clientX,
+      y: clientY
+    }
+  }
+
+  onResize() {
+    const w = innerWidth;
+    const h = innerHeight;
+    
+    this.uniforms.u_resolution.value.x = w
+    this.uniforms.u_resolution.value.y = h
+    this.renderer.setSize(w, h);
+    this.camera.aspect = w / h;
+
+    if (w / h > 1) {
+      this.mesh.scale.x = this.mesh.scale.y = 1.05 * w / h;
+    }
+
+    this.camera.updateProjectionMatrix();
   }
 
   update() {
-    const now = performance.now();
-    const p = (now - this.opts.start) / this.opts.duration;
+    this.uniforms.u_time.value = this.clock.getElapsedTime()
     
-    if (p >= 1) {
-      this.opts.completed = true;
-      return this.opts.resolve();
-    }
-
-    for (let v in this.opts.set) {
-      this.opts.obj[v] = this.lerp(
-        this.opts.obj[v],
-        this.opts.set[v],
-        this.outElastic(p)
-      );
-    }
-
+    this.uniforms.u_mouse.value.x = this.math.lerp(this.mouse.x, this.uniforms.u_mouse.value.x, .5)
+    
+    this.uniforms.u_mouse.value.y = this.math.lerp(this.mouse.y, this.uniforms.u_mouse.value.y, .5)
+    
+    this.draw();
     requestAnimationFrame(this.update);
+  }
+
+  draw() {
+    this.renderer.render(this.scene, this.camera);
   }
 }
 
-const init = () => {
-  const content = document.querySelector(".content-canvas");
-  const shader = {
-    v: document.querySelector("#vertex").textContent,
-    f: document.querySelector("#fragment").textContent
-  };
-  const mathUtils = new MathUtils();
-  const mouse = {
-    x: 0,
-    y: 0
-  };
-  const gl = {
-    renderer: new THREE.WebGLRenderer(),
-    camera: new THREE.PerspectiveCamera(
-      75,
-      innerWidth / innerHeight,
-      0.1,
-      1000
-    ),
-    scene: new THREE.Scene(),
-    loader: new THREE.TextureLoader(),
-    clock: new THREE.Clock()
-  };
+const webgl = new WebGL(canvas);
 
-  const uniforms = {
-    u_time: { type: "f", value: 0 },
-    u_res: { type: "v2", value: new THREE.Vector2(innerWidth, innerHeight) },
-    u_mouse: { type: "v2", value: new THREE.Vector2(0, 0) },
-    direction: { type: "v2", value: new THREE.Vector2(0, 0) },
-    maxRadius: { type: "f", value: 100 },
-    minRadius: { type: "f", value: 25 },
-    text: {
-      value: gl.loader.load(
-        "https://images.unsplash.com/photo-1550847067-93887e03cfbe?ixlib=rb-1.2.1&q=85&fm=jpg&crop=entropy&cs=srgb&ixid=eyJhcHBfaWQiOjE0NTg5fQ"
-      )
-    }
-  };
+webgl.init();
 
-  const addScene = () => {
-    gl.renderer.setPixelRatio(devicePixelRatio);
-    gl.renderer.setSize(innerWidth, innerHeight);
-    gl.camera.position.z = 5;
-    //gl.controls = new THREE.OrbitControls(gl.camera, gl.renderer.domElement);
-    content.append(gl.renderer.domElement);
-    gl.scene.add(gl.camera);
-  };
-
-  const addMesh = () => {
-    const geometry = new THREE.PlaneGeometry(1, 1, 1);
-    const material = new THREE.ShaderMaterial({
-      uniforms: uniforms,
-      vertexShader: shader.v,
-      fragmentShader: shader.f
-    });
-
-    gl.mesh = new THREE.Mesh(geometry, material);
-
-    gl.scene.add(gl.mesh);
-  };
-
-  let elapsed = 0
-  const update = e => {
-    elapsed = gl.clock.getElapsedTime();
-    uniforms.u_time.value = elapsed
- 
-    uniforms.u_mouse.value.x = mathUtils.lerp(
-      uniforms.u_mouse.value.x,
-      mouse.x,
-      0.05
-    );
-    uniforms.u_mouse.value.y = mathUtils.lerp(
-      uniforms.u_mouse.value.y,
-      mouse.y,
-      0.05
-    );
-    render();
-    requestAnimationFrame(update);
-  };
-
-  const resize = () => {
-    const w = innerWidth;
-    const h = innerHeight;
-    gl.renderer.setSize(w, h);
-    gl.camera.aspect = w / h;
-
-    // calculate scene
-    const dist = gl.camera.position.z - gl.mesh.position.z;
-    const height = 1;
-    gl.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
-
-    if (w / h > 1) {
-      gl.mesh.scale.x = gl.mesh.scale.y = 1.05 * w / h;
-    }
-
-    gl.camera.updateProjectionMatrix();
-  };
-
-  const render = () => {
-    gl.renderer.render(gl.scene, gl.camera);
-  };
-
-  addScene();
-  addMesh();
-  update();
-  resize();
-  window.addEventListener("resize", resize);
-  window.addEventListener("mousemove", ({ clientX, clientY }) => {
-    mouse.x = clientX / innerWidth;
-    mouse.y = clientY / innerHeight;
-  });
-    
-  content.addEventListener("click", () => {
-    TweenMax.to(uniforms.diff, 2, {
-      value: 1
-    });
-  });
-};
-
-init();
 
