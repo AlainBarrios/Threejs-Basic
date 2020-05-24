@@ -1,7 +1,8 @@
 export class BasicThreeDemo {
   constructor(container) {
-    this.width = container.offsetWidth;
-    this.height = container.offsetHeight;
+    this.width = innerWidth;
+    this.height = innerHeight;
+    
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.camera = new THREE.PerspectiveCamera(
       45,
@@ -47,7 +48,15 @@ export class BasicThreeDemo {
     this.disposed = true;
   }
   
-  onResize() {}
+  onResize() {
+    const _w = innerWidth;
+    const _h = innerHeight;
+
+    this.renderer.setSize(_w, _h);
+    this.camera.aspect = _w / _h;
+
+    this.camera.updateProjectionMatrix();
+  }
   update() {}
 
   render() {
@@ -66,11 +75,11 @@ export class BasicThreeDemo {
     
     this.render();
     this.update();
-    requestAnimationFrame(this.tick);
+    window.requestAnimationFrame(this.tick);
   }
 }
 
-const resizeRendererToDisplaySize = (renderer, setSize) => {
+function resizeRendererToDisplaySize(renderer, setSize) {
   const canvas = renderer.domElement;
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
@@ -79,5 +88,5 @@ const resizeRendererToDisplaySize = (renderer, setSize) => {
     setSize(width, height, false);
   }
   return needResize;
-};
+}
 
