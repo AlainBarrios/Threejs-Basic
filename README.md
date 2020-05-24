@@ -1,2 +1,2 @@
-# Three-js-boilertplate
-a little boilerplate 
+# Three-js-template
+a little template 
