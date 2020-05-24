@@ -1,27 +1,5 @@
 export class BasicThreeDemo {
   constructor(container) {
-    this.width = innerWidth;
-    this.height = innerHeight;
-    
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.camera = new THREE.PerspectiveCamera(
-      45,
-      this.width / this.height,
-      0.1,
-      1000
-    );
-    this.scene = new THREE.Scene();
-    this.clock = new THREE.Clock();
-    
-    container.appendChild(this.renderer.domElement)
-    
-    this.setSize(this.width, this.height)
-    this.renderer.setPixelRatio(window.devicePixelRatio)
-    
-    this.camera.position.z = 10;
-
-export class BasicThreeDemo {
-  constructor(container) {
     this.container = container
     this.width = container.offsetWidth;
     this.height = container.offsetHeight;
