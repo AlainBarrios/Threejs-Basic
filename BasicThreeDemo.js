@@ -1,7 +1,7 @@
 export class BasicThreeDemo {
   constructor(container) {
-    this.width = window.innerWidth;
-    this.height = window.innerHeight;
+    this.width = container.offsetWidth;
+    this.height = container.offsetHeight;
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.camera = new THREE.PerspectiveCamera(
       45,
