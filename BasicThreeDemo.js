@@ -20,22 +20,46 @@ export class BasicThreeDemo {
     
     this.camera.position.z = 10;
 
+export class BasicThreeDemo {
+  constructor(container) {
+    this.container = container
+    this.width = container.offsetWidth;
+    this.height = container.offsetHeight;
+
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
+    this.camera = new THREE.PerspectiveCamera(
+      45,
+      this.width / this.height,
+      0.1,
+      1000
+    );
+    this.scene = new THREE.Scene();
+    this.clock = new THREE.Clock();
+
+    container.appendChild(this.renderer.domElement);
+
+    this.renderer.setSize(this.width, this.height);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+
+    this.camera.position.z = 10;
+
     this.assets = {};
     this.disposed = false;
 
     this.tick = this.tick.bind(this);
     this.init = this.init.bind(this);
-    this.setSize = this.setSize.bind(this);
+    this.onResize = this.onResize.bind(this);
   }
 
   init() {
     this.tick();
+    this.initEvents();
   }
 
-  setSize(width, height, updateStyle) {
-    this.renderer.setSize(width, height, false);
+  initEvents() {
+    window.addEventListener("resize", this.onResize);
   }
-  
+
   getViewSizeAtDepth(depth = 0) {
     const fovInRadians = (this.camera.fov * Math.PI) / 180;
     const height = Math.abs(
@@ -43,20 +67,21 @@ export class BasicThreeDemo {
     );
     return { width: height * this.camera.aspect, height };
   }
-  
+
   dispose() {
     this.disposed = true;
   }
-  
+
   onResize() {
-    const _w = innerWidth;
-    const _h = innerHeight;
+    const _w = this.container.offsetWidth;
+    const _h = this.container.offsetHeight;
 
     this.renderer.setSize(_w, _h);
     this.camera.aspect = _w / _h;
 
     this.camera.updateProjectionMatrix();
   }
+
   update() {}
 
   render() {
@@ -65,28 +90,11 @@ export class BasicThreeDemo {
 
   tick() {
     if (this.disposed) return;
-    
-    if (resizeRendererToDisplaySize(this.renderer, this.setSize)) {
-      const canvas = this.renderer.domElement;
-      this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
-      this.camera.updateProjectionMatrix();
-      this.onResize();
-    }
-    
+
     this.render();
     this.update();
     window.requestAnimationFrame(this.tick);
   }
 }
 
-function resizeRendererToDisplaySize(renderer, setSize) {
-  const canvas = renderer.domElement;
-  const width = canvas.clientWidth;
-  const height = canvas.clientHeight;
-  const needResize = canvas.width !== width || canvas.height !== height;
-  if (needResize) {
-    setSize(width, height, false);
-  }
-  return needResize;
-}
 
