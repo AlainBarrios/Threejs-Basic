@@ -8,8 +8,6 @@ class App extends BasicThreeDemo {
   
     // Iniciar la escena
     init() {
-      console.log(this.width, this.height)
-
       const control = new OrbitControls(this.camera, this.renderer.domElement);
   
       this.camera.position.z = 5;
