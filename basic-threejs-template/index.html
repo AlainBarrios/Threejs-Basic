@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html>
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+
+<body>
+    <div id="app"></div>
+
+    <script id="vs" type="x-shader/x-vertex">
+        #define TAU 6.28318530718
+          #define PI 3.14159265359
+          #define S(a,b,n) smoothstep(a,b,n)
+          
+          varying vec2 vUv;
+          
+          void main() {
+            
+            vec4 mvPosition = modelViewMatrix * vec4(position,1.);
+            gl_Position = projectionMatrix * mvPosition;
+            
+            vUv = uv;
+          }
+        </script>
+    <script id="fs" type="x-shader/x-fragment">
+        #define TAU 6.28318530718
+          #define PI 3.14159265359
+          #define S(a,b,n) smoothstep(a,b,n)
+            
+          varying vec2 vUv;
+          
+          void main() {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+          }
+          
+        </script>
+    <script src="https://threejs.org/build/three.js"></script>
+    <script src="app.mjs" type="module"></script>
+</body>
+
+</html>
