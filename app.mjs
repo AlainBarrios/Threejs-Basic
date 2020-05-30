@@ -12,6 +12,8 @@ class App extends BasicThreeDemo {
   
       this.camera.position.z = 5;
       this.camera.position.y = 5;
+        
+      control.update()          
   
       this.initEvents();
       this.axesHelper(5);
