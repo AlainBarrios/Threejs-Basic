@@ -1,2 +1,2 @@
-# Three-js-template
-a little template 
+# Three-js-Basic
+
