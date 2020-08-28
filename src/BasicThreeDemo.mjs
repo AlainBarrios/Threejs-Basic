@@ -18,6 +18,8 @@ export class BasicThreeDemo {
   
       this.renderer.setSize(this.width, this.height);
       this.renderer.setPixelRatio(window.devicePixelRatio);
+        
+      this.renderer.outputEncoding = THREE.sRGBEncoding;
   
       this.camera.position.z = 10;
   
